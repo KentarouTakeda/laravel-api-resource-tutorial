@@ -78,4 +78,21 @@ class TodoControllerTest extends TestCase
             'title' => 'foo'
         ]);
     }
+
+    public function test_update(): void
+    {
+        Todo::factory()
+            ->for($this->user)
+            ->create(['id' => 42, 'is_completed' => false]);
+
+        $this->json('PUT', 'todos/42', ['is_completed' => true])
+            ->assertStatus(200)
+            ->assertJsonPath('data.id', 42)
+            ->assertJsonPath('data.is_completed', true);
+
+        $this->assertDatabaseHas(Todo::class, [
+            'user_id' => $this->user->id,
+            'is_completed' => true
+        ]);
+    }
 }

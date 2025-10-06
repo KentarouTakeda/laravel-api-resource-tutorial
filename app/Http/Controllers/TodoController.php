@@ -43,7 +43,9 @@ class TodoController extends Controller
      */
     public function update(UpdateTodoRequest $request, Todo $todo)
     {
-        //
+        $todo->update($request->validated());
+
+        return new TodoResource($todo);
     }
 
     /**
