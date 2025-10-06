@@ -33,8 +33,10 @@ class TodoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Todo $todo)
+    public function show(Request $request, Todo $todo)
     {
+        abort_if($request->user()->cannot('view', $todo), 404);
+
         return new TodoResource($todo);
     }
 
@@ -43,6 +45,8 @@ class TodoController extends Controller
      */
     public function update(UpdateTodoRequest $request, Todo $todo)
     {
+        abort_if($request->user()->cannot('update', $todo), 404);
+
         $todo->update($request->validated());
 
         return new TodoResource($todo);
@@ -51,8 +55,10 @@ class TodoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Todo $todo)
+    public function destroy(Request $request, Todo $todo)
     {
+        abort_if($request->user()->cannot('delete', $todo), 404);
+
         $todo->delete();
 
         return new TodoResource($todo);

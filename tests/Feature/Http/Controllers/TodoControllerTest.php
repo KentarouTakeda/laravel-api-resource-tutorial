@@ -95,4 +95,19 @@ class TodoControllerTest extends TestCase
             'is_completed' => true
         ]);
     }
+
+    public function test_policy(): void
+    {
+        Todo::factory()
+            ->create(['id' => 42]);
+
+        $this->json('GET', 'todos/42')
+            ->assertStatus(404);
+
+        $this->json('PUT', 'todos/42', ['is_completed' => true])
+            ->assertStatus(404);
+
+        $this->json('DELETE', 'todos/42')
+            ->assertStatus(404);
+    }
 }
