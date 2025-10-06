@@ -30,4 +30,18 @@ class LoginControllerTest extends TestCase
 
         $this->assertGuest();
     }
+
+    public function test_login(): void
+    {
+        $response = $this->json('POST', 'login', [
+            'email' => 'test@example.com',
+            'password' => 'password',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.email', 'test@example.com')
+            ->assertJsonMissingPath('data.password');
+
+        $this->assertAuthenticatedAs($this->user);
+    }
 }

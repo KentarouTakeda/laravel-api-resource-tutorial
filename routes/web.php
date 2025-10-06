@@ -10,4 +10,5 @@ Route::get('/', function () {
 
 Route::apiResource('todos', TodoController::class)->middleware('auth');
 
+Route::post('login', [LoginController::class, 'store']);
 Route::delete('login', [LoginController::class, 'destroy']);
