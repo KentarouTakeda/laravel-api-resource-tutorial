@@ -53,4 +53,17 @@ class TodoControllerTest extends TestCase
             ->assertJsonPath('data.0.id', 23)
             ->assertJsonPath('data.1.id', 42);
     }
+
+    public function test_destroy(): void
+    {
+        Todo::factory()
+            ->for($this->user)
+            ->create(['id' => 42]);
+
+        $this->json('DELETE', 'todos/42')
+            ->assertStatus(200)
+            ->assertJsonPath('data.id', 42);
+
+        $this->assertDatabaseMissing(Todo::class, ['id' => 42]);
+    }
 }
