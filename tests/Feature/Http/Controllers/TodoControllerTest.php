@@ -35,4 +35,22 @@ class TodoControllerTest extends TestCase
             ->assertJsonPath('data.id', 42)
             ->assertJsonPath('data.title', 'foo');
     }
+
+    public function test_index(): void
+    {
+        Todo::factory()
+            ->for($this->user)
+            ->createMany([
+                ['id' => 42],
+                ['id' => 23],
+            ]);
+
+        Todo::factory()->create();
+
+        $this->json('GET', 'todos')
+            ->assertStatus(200)
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.id', 23)
+            ->assertJsonPath('data.1.id', 42);
+    }
 }
