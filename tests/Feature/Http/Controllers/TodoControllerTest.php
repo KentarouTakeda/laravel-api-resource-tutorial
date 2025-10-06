@@ -31,6 +31,7 @@ class TodoControllerTest extends TestCase
 
         $this->json('GET', 'todos/42')
             ->assertStatus(200)
+            ->assertJsonMissingPath('data.created_at')
             ->assertJsonPath('data.id', 42)
             ->assertJsonPath('data.title', 'foo');
     }

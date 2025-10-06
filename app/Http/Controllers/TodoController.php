@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
+use App\Http\Resources\TodoResource;
 use App\Models\Todo;
 
 class TodoController extends Controller
@@ -29,7 +30,7 @@ class TodoController extends Controller
      */
     public function show(Todo $todo)
     {
-        return ['data' => $todo];
+        return new TodoResource($todo);
     }
 
     /**
