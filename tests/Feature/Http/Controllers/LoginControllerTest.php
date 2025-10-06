@@ -2,19 +2,32 @@
 
 namespace Tests\Feature\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class LoginControllerTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
+    use RefreshDatabase;
 
-        $response->assertStatus(200);
+    private User $user;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = User::factory()->create([
+            'email' => 'test@example.com',
+        ]);
+    }
+
+    public function test_logout(): void
+    {
+        $this->actingAs($this->user);
+
+        $this->json('DELETE', 'login');
+
+        $this->assertGuest();
     }
 }
