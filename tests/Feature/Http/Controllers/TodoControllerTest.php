@@ -2,19 +2,112 @@
 
 namespace Tests\Feature\Http\Controllers;
 
+use App\Models\Todo;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class TodoControllerTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
+    use RefreshDatabase;
 
-        $response->assertStatus(200);
+    private User $user;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+
+        $this->user = User::factory()->create();
+
+        $this->actingAs($this->user);
+    }
+
+    public function test_show(): void
+    {
+        Todo::factory()
+            ->for($this->user)
+            ->create(['id' => 42, 'title' => 'foo']);
+
+        $this->json('GET', 'todos/42')
+            ->assertStatus(200)
+            ->assertJsonMissingPath('data.created_at')
+            ->assertJsonPath('data.id', 42)
+            ->assertJsonPath('data.title', 'foo');
+    }
+
+    public function test_index(): void
+    {
+        Todo::factory()
+            ->for($this->user)
+            ->createMany([
+                ['id' => 42],
+                ['id' => 23],
+            ]);
+
+        Todo::factory()->create();
+
+        $this->json('GET', 'todos')
+            ->assertStatus(200)
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.id', 23)
+            ->assertJsonPath('data.1.id', 42);
+    }
+
+    public function test_destroy(): void
+    {
+        Todo::factory()
+            ->for($this->user)
+            ->create(['id' => 42]);
+
+        $this->json('DELETE', 'todos/42')
+            ->assertStatus(200)
+            ->assertJsonPath('data.id', 42);
+
+        $this->assertDatabaseMissing(Todo::class, ['id' => 42]);
+    }
+
+    public function test_store(): void
+    {
+        $this->json('POST', 'todos', ['title' => 'foo'])
+            ->assertStatus(201)
+            ->assertJsonPath('data.title', 'foo');
+
+        $this->assertDatabaseHas(Todo::class, [
+            'user_id' => $this->user->id,
+            'title' => 'foo'
+        ]);
+    }
+
+    public function test_update(): void
+    {
+        Todo::factory()
+            ->for($this->user)
+            ->create(['id' => 42, 'is_completed' => false]);
+
+        $this->json('PUT', 'todos/42', ['is_completed' => true])
+            ->assertStatus(200)
+            ->assertJsonPath('data.id', 42)
+            ->assertJsonPath('data.is_completed', true);
+
+        $this->assertDatabaseHas(Todo::class, [
+            'user_id' => $this->user->id,
+            'is_completed' => true
+        ]);
+    }
+
+    public function test_policy(): void
+    {
+        Todo::factory()
+            ->create(['id' => 42]);
+
+        $this->json('GET', 'todos/42')
+            ->assertStatus(404);
+
+        $this->json('PUT', 'todos/42', ['is_completed' => true])
+            ->assertStatus(404);
+
+        $this->json('DELETE', 'todos/42')
+            ->assertStatus(404);
     }
 }
