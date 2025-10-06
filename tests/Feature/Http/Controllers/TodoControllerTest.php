@@ -66,4 +66,16 @@ class TodoControllerTest extends TestCase
 
         $this->assertDatabaseMissing(Todo::class, ['id' => 42]);
     }
+
+    public function test_store(): void
+    {
+        $this->json('POST', 'todos', ['title' => 'foo'])
+            ->assertStatus(201)
+            ->assertJsonPath('data.title', 'foo');
+
+        $this->assertDatabaseHas(Todo::class, [
+            'user_id' => $this->user->id,
+            'title' => 'foo'
+        ]);
+    }
 }

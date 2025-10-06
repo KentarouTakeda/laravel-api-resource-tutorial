@@ -25,7 +25,9 @@ class TodoController extends Controller
      */
     public function store(StoreTodoRequest $request)
     {
-        //
+        $todo = $request->user()->todos()->create($request->validated());
+
+        return new TodoResource($todo);
     }
 
     /**
